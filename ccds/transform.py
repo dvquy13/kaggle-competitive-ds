@@ -29,17 +29,17 @@ def _gen_feature_prev_month(df, num_month, operator=">"):
 
     _grp_by = ["target_date_block_num", "shop_id", "item_id"]
     _agg_by = df_.columns.tolist()
-    # if features:
-    #     _agg_by = df_.reset_index().drop(columns=_grp_by).columns.tolist()
-    # else:
-    #     _agg_by = features
     df_agg = df_.reset_index().groupby(_grp_by, as_index=True)[_agg_by].mean()
     df_agg = df_agg.drop(columns=["date_block_num"])
     return df_agg
 
 
-def gen_feature_same_month_last_year(df, features=None):
-    return _gen_feature_prev_month(df, num_month=12, operator="==")
+def gen_feature_n_prev_month(df, n):
+    return _gen_feature_prev_month(df, num_month=n, operator="==")
+
+
+def gen_feature_same_month_last_year(df):
+    return gen_feature_n_prev_month(df, n=12)
 
 
 def gen_feature_last_prev_months(df, num_month):

@@ -7,6 +7,10 @@ from northrend.data.sklearn_xtend.pipeline import (
 )
 
 
+def select_columns(df, columns):
+    return df[columns]
+
+
 def _gen_feature_prev_month(df, num_month, operator=">"):
     def _flag_in_window(series, num_month):
         _eval = eval(f"series {operator} (series.max() - num_month)")
@@ -23,16 +27,18 @@ def _gen_feature_prev_month(df, num_month, operator=">"):
     df_ = df_.query("flag_in_window == 1")
     df_ = df_.drop(columns=["flag_in_window"])
 
-    df_agg = (
-        df_.reset_index()
-        .groupby(["target_date_block_num", "shop_id", "item_id"], as_index=True)
-        .mean()
-    )
+    _grp_by = ["target_date_block_num", "shop_id", "item_id"]
+    _agg_by = df_.columns.tolist()
+    # if features:
+    #     _agg_by = df_.reset_index().drop(columns=_grp_by).columns.tolist()
+    # else:
+    #     _agg_by = features
+    df_agg = df_.reset_index().groupby(_grp_by, as_index=True)[_agg_by].mean()
     df_agg = df_agg.drop(columns=["date_block_num"])
     return df_agg
 
 
-def gen_feature_same_month_last_year(df):
+def gen_feature_same_month_last_year(df, features=None):
     return _gen_feature_prev_month(df, num_month=12, operator="==")
 
 
@@ -89,6 +95,21 @@ def convert_to_int(df):
 def create_month_indicator(df):
     df_ = df.copy()
     df_["target_date_block_num_modulo"] = df["target_date_block_num"] % 12
+    return df_
+
+
+def impute_selected_columns(df, col_pattern: list, constant):
+    df_ = df.copy()
+
+    cols = []
+    for pattern in col_pattern:
+        _cols = df_.columns[df.columns.str.contains(pattern)]
+        cols.extend(_cols)
+
+    print(f"Impute value {constant} for {len(cols)} columns: {cols[:5]}...")
+
+    df_ = df_[cols].fillna(constant)
+
     return df_
 
 

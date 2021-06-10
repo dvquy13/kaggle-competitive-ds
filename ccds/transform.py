@@ -83,7 +83,13 @@ def get_num_features(df):
 def calc_diff_num_features(df):
     df_ = df.assign(
         item_cnt_month_1m_diff_3m=lambda df: df["item_cnt_month__1m"].fillna(0)
-        - df["item_cnt_month__3m"].fillna(0)
+        - df["item_cnt_month__3m"].fillna(0),
+        item_cnt_month_1m_diff_2p=lambda df: df["item_cnt_month__1m"].fillna(0)
+        - df["item_cnt_month__2_prev_month"].fillna(0),
+        item_cnt_month_1m_diff_3p=lambda df: df["item_cnt_month__1m"].fillna(0)
+        - df["item_cnt_month__3_prev_month"].fillna(0),
+        item_cnt_month_1m_diff_4p=lambda df: df["item_cnt_month__1m"].fillna(0)
+        - df["item_cnt_month__4_prev_month"].fillna(0),
     )
     return df_
 

@@ -15,3 +15,7 @@ northrend
 # analytics
 numpy
 pandas
+ipython
+
+# modeling
+sklearn

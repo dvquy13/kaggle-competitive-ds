@@ -125,17 +125,13 @@ def align_feature_label(X, y):
     return X.reindex(indices), y_.reindex(indices)
 
 
-def prepare_fit(
-    X, y, transform_X_fn, feature_engineer_fn, feature_engineer_pipe, items_df, shops_df
-):
+def prepare_fit(X, y, transform_X_fn, feature_engineer_fn, items_df, shops_df):
     X_t = transform_X_fn(X)
     X_t = X_t.pipe(add_item_category_meta, items_df)
     X_t = X_t.pipe(add_shop_meta, shops_df)
 
     X_t = feature_engineer_fn(X_t.reset_index())
 
-    feature_names = _nr_pipeline_feature_names_.get_feature_names(feature_engineer_pipe)
-    X_t = pd.DataFrame(data=X_t, columns=feature_names)
     X_t = X_t.convert_dtypes(
         convert_string=False,
         convert_integer=False,
@@ -153,3 +149,13 @@ def prepare_fit(
 
     X_t_aln, y_aln = align_feature_label(X_t, y)
     return X_t_aln, y_aln
+
+
+def gen_feature_zero_count(df):
+    df_ = df.assign(count_zero=(df == 0).sum(axis=1))
+    return df_
+
+
+def gen_feature_null_count(df):
+    df_ = df.assign(count_null=df.isnull().sum(axis=1))
+    return df_
